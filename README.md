@@ -80,9 +80,12 @@ Modern data tools run best on Linux. Windows users can run Linux natively using 
    > ⚠️ **IMPORTANT:** Remember this password! It will not show characters on the screen as you type it. You will need to enter this password anytime you run an administrator command (commands starting with `sudo`).
 
 ### Step 2: Install Prerequisites in Ubuntu
-Inside your Ubuntu terminal, make sure Python and Git are installed:
+Inside your Ubuntu terminal, copy and run these two commands **one by one**:
 ```bash
 sudo apt update && sudo apt upgrade -y
+```
+
+```bash
 sudo apt install python3 python3-pip python3-venv git -y
 ```
 
@@ -165,4 +168,87 @@ dbt run
 ```
 *If everything is successful, you will see green `[OK]` messages for all 24 models!*
 
-Your database is now fully built and resides locally in `data/duckdb/hackathon.duckdb`. It is ready to be queried by Tableau or the Qualitia AI Agent!
+Your database is now fully built and resides locally in `data/duckdb/hackathon.duckdb`. It is ready to be queried by Tableau, the Qualitia AI Agent, or via the built-in DuckDB UI!
+
+### Step 7: Explore Your Data with the DuckDB Web UI (Optional)
+DuckDB features a beautiful, built-in, local web-based User Interface (UI) where you can easily run SQL queries against your database directly in your browser.
+
+There are two easy ways to launch the UI and load your database:
+
+#### Option A: Load Your Database Directly on Launch (Recommended)
+You can launch the DuckDB CLI with both the `-ui` flag and your database file path. DuckDB will automatically load the database into your session:
+
+1. Make sure you are in the project folder in your terminal:
+   ```bash
+   cd ~/qualitia
+   ```
+2. Start the DuckDB UI with the database:
+   ```bash
+   duckdb data/duckdb/hackathon.duckdb -ui
+   ```
+   *(DuckDB will automatically download and install the built-in UI extension if it's your first time running this command).*
+
+#### Option B: Load the Database from Inside the UI
+If you have already launched the UI using just `duckdb -ui` (without a database file), you can still attach your database file by running an `ATTACH` SQL command inside the UI:
+
+1. Start the empty UI:
+   ```bash
+   duckdb -ui
+   ```
+2. In the query editor of the web UI, run the following SQL command to connect your database:
+   ```sql
+   ATTACH 'data/duckdb/hackathon.duckdb' AS hackathon;
+   ```
+   *(You can then expand the schema tree on the left sidebar to see all of your dbt marts and tables!).*
+
+#### 🌐 Accessing the UI in Your Browser
+When you run either of the commands above:
+- DuckDB will launch a local server and try to open your default browser.
+- If it does not open automatically (especially when running inside WSL), simply open your favorite browser (Chrome, Edge, Firefox) on your computer and navigate to:
+  ```text
+  http://localhost:4213
+  ```
+- To stop the server and close the UI when you are done, go back to your terminal and press `Ctrl + C`.
+
+#### 🔍 Query Examples (Interactive SQL Notebook)
+The DuckDB Web UI operates as an **interactive SQL Notebook** (similar to Jupyter Notebooks or Hex). You can write multiple queries in separate "cells," execute them independently by clicking **Run** (or pressing `Shift + Enter`), and inspect automatic data diagnostics (like Null % and value histograms) on the right sidebar. Your notebooks are saved locally and automatically restored next time you open the UI!
+
+Once you have loaded your database, you can run these query examples inside your notebook cells:
+
+##### Example 1: Querying your Mart Tables
+Since our database file is named `hackathon.duckdb`, DuckDB mounts it with the database name `hackathon`. Combined with our dbt custom schema configuration, all of your mart tables are accessible directly at `hackathon.marts.<table_name>` (or simply `marts.<table_name>`).
+
+Here is a query to analyze seller performance metrics directly:
+```sql
+SELECT
+    seller_id,
+    state AS seller_state,
+    total_orders,
+    ROUND(total_revenue_usd, 2) AS total_revenue_usd,
+    ROUND(delay_rate_pct, 1) AS delay_rate_pct,
+    ROUND(avg_review_score, 2) AS avg_review_score,
+    total_negative_reviews,
+    CASE 
+        WHEN avg_review_score >= 4.5 AND delay_rate_pct <= 5 THEN 'Super Seller (Excellent Score & Delivery)'
+        WHEN avg_review_score <= 3.0 OR delay_rate_pct >= 25 THEN 'High Risk / Rogue (Bad Score or Extreme Delays)'
+        ELSE 'Standard Seller'
+    END AS seller_classification
+FROM hackathon.marts.mart_obt_sellers
+WHERE total_orders >= 50
+ORDER BY total_revenue_usd DESC, avg_review_score ASC
+LIMIT 15;
+```
+
+##### Example 2: Querying a Raw Parquet File Directly
+DuckDB also allows you to query raw files (such as `.parquet`, `.csv`, `.json`) directly on disk simply by specifying their path inside the `FROM` clause:
+```sql
+SELECT 
+    customer_state,
+    COUNT(*) AS total_customers
+FROM 'data/olist/olist_customers.parquet'
+GROUP BY 1
+ORDER BY 2 DESC
+LIMIT 5;
+```
+
+
