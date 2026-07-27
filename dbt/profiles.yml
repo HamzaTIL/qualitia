@@ -1,0 +1,8 @@
+qualitia:
+  target: dev
+
+  outputs:
+    dev:
+      type: duckdb
+      path: ../data/duckdb/hackathon.duckdb
+      threads: 4
