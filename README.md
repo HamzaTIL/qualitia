@@ -263,4 +263,22 @@ ORDER BY 2 DESC
 LIMIT 5;
 ```
 
+---
+
+### 📥 Step 8: Exporting Mart Tables to CSV (Optional)
+If you need to load the fully built dbt marts into another tool (like Excel, Python, or another BI tool), we provide an automated script to export all mart tables directly to CSV:
+
+1. Make sure you are in the project folder and your virtual environment is active:
+   ```bash
+   cd ~/qualitia
+   ```
+2. Run the export script:
+   ```bash
+   python3 export_marts_to_csv.py
+   ```
+This will automatically connect to your local DuckDB database, scan the `marts` schema, and save all 8 tables as CSV files under the `data/csv/` directory (created automatically).
+
+*(Note: These exported CSV files are ignored by Git to prevent repository bloat).*
+
+
 
