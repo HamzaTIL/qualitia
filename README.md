@@ -173,6 +173,18 @@ Your database is now fully built and resides locally in `data/duckdb/hackathon.d
 ### Step 7: Explore Your Data with the DuckDB Web UI (Optional)
 DuckDB features a beautiful, built-in, local web-based User Interface (UI) where you can easily run SQL queries against your database directly in your browser.
 
+> ⚠️ **Prerequisite:** The `duckdb` command-line tool (CLI) must be installed on your system. The Python package installed via `requirements.txt` only provides the Python client library bindings, not the terminal CLI utility itself.
+>
+> To quickly install the CLI and configure it on your Ubuntu/WSL system, run these commands:
+> ```bash
+> # 1. Download and install the latest DuckDB CLI
+> curl https://install.duckdb.org | sh
+>
+> # 2. Add it to your terminal PATH so the 'duckdb' command is recognized
+> echo 'export PATH="$HOME/.duckdb/cli/latest:$PATH"' >> ~/.bashrc
+> source ~/.bashrc
+> ```
+
 There are two easy ways to launch the UI and load your database:
 
 #### Option A: Load Your Database Directly on Launch (Recommended)
