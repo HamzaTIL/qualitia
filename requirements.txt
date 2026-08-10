@@ -54,3 +54,5 @@ typing-inspection==0.4.2
 typing_extensions==4.16.0
 urllib3==2.7.0
 zipp==4.1.0
+python-dotenv
+google-genai
