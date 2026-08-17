@@ -55,7 +55,35 @@ def run_agent():
             print("\n🤖 Agent is investigating...")
             response = chat.send_message(user_input)
             
-            print(f"🤖 Agent: {response.text}\n")
+            # Loop to handle potentially multiple turns of tool calls
+            while response.function_calls:
+                for function_call in response.function_calls:
+                    name = function_call.name
+                    args = function_call.args
+                    
+                    print(f"   [Tool Call] 🛠️  {name}({args})")
+                    
+                    # Execute the tool
+                    try:
+                        if name == "query_duckdb":
+                            tool_result = query_duckdb(**args)
+                        elif name == "get_dbt_lineage":
+                            tool_result = get_dbt_lineage(**args)
+                        else:
+                            tool_result = f"Error: Unknown tool {name}"
+                    except Exception as e:
+                        tool_result = f"Tool execution failed: {str(e)}"
+                    
+                    # Send the result back to the model
+                    response = chat.send_message(
+                        types.Part.from_function_response(
+                            name=name,
+                            response={"result": tool_result}
+                        )
+                    )
+            
+            if response.text:
+                print(f"🤖 Agent: {response.text}\n")
             
         except Exception as e:
             print(f"❌ Error during execution: {e}")
