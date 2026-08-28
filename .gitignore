@@ -2,7 +2,12 @@
 logs
 data/duckdb/hackathon.duckdb
 qualitia-venv/
+__pycache__/
 
 # Exported CSVs
 data/csv/
+
+
+# Secrets
+.env
 

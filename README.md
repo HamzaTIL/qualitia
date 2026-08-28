@@ -64,6 +64,22 @@ We follow a modern "Medallion / Kimball" hybrid architecture, culminating in **O
 
 ---
 
+## 🤖 Qualitia Data Quality Agent Architecture
+
+The AI agent is located in the `agent/` folder and operates as an autonomous Data Quality Root Cause Analysis engine powered by Google Gemini (e.g., `gemini-3.5-flash-lite`).
+
+### Core Components
+- **Agent Orchestrator (`main.py`):** Utilizes the `google-genai` SDK to handle the LLM tool-calling loop autonomously. It enforces strict bounds (e.g., maximum of 6 tool calls per investigation) and includes robust retry mechanisms to gracefully handle rate limits (HTTP 429 errors).
+- **Interactive Web UI (`app.py`):** A newly developed Streamlit web application providing a conversational UI. It intercepts and visualizes the agent's background tool executions (e.g., SQL queries, lineage tracing) via expandable UI blocks and automatically manages the context window between investigations.
+- **Custom Tool Suite (`tools.py`):** The agent is equipped with native integration directly into the data stack:
+  - `query_duckdb`: Executes read-only exploratory SQL against the `hackathon.duckdb` database.
+  - `list_tables` & `get_schema`: Inspects the data warehouse's structure.
+  - `get_dbt_lineage`: Traces up/downstream dbt dependencies by parsing the compiled `manifest.json`.
+  - `get_model_sql`: Views the transformation logic (compiled/raw SQL) behind dbt models.
+  - `get_dq_history`: Analyzes metrics over historical time windows to pinpoint when anomalies began.
+
+---
+
 ## 🛠️ Getting Started (From Scratch)
 
 This guide is written for **non-technical users** setting up the project on a Windows machine from scratch.
