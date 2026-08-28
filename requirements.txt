@@ -56,3 +56,4 @@ urllib3==2.7.0
 zipp==4.1.0
 python-dotenv
 google-genai
+streamlit
